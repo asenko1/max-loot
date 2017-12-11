@@ -18,10 +18,13 @@ public class LootOptimizer {
     }
     
     public static double getOptimalValue(int capacity, int[] values, int[] weights) {
+    	if(capacity == 0 || values == null || weights == null){
+    		return 0;
+    	}
     	//Idea: take largest weight/value ratio and add to pack, then next largest, then next until full
         double value = 0;
-        int[] weightValueRatio = new int[values.length];
-        for(int i : values){
+        double[] weightValueRatio = new double[values.length];
+        for(int i = 0; i < values.length; i++){
         	weightValueRatio[i] = values[i]/weights[i]; //unit: $/kg
         }
         
@@ -30,12 +33,12 @@ public class LootOptimizer {
         
         int i = 0;
         while(capacity > 0 && i < values.length){
-        	int max = 0; 
+        	double max = 0; 
         	int index = 0;
         	//Find max, n^2 algorithm -> should refactor later
         	for(int j = 0; j < values.length; j++){
         		if(weightValueRatio[j] > max){
-        			max = weightValueRatio[i];
+        			max = weightValueRatio[j];
         			index = j;
         		}
         	}
@@ -43,11 +46,12 @@ public class LootOptimizer {
         	if(capacity >= weights[index]){
         		//take all of item
         		capacity = capacity - weights[index];
-        		value = (double) values[index] * weights[index];
+        		value += values[index];
+        		weightValueRatio[index] = 0; //signifies item has been taken
         	}
         	else{
         		//take fraction of item to fill capacity
-        		value = (double) values[index] * (weights[index] - capacity);
+        		value = (double) values[index] * ((double)capacity/ (double)weights[index]);
         		capacity = 0;
         	}
         }
